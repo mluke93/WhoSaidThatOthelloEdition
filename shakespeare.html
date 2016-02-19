@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Who Said That? SE</title>
+  <meta charset="UTF-8">
+	<style>
+		body {background-color:lightblue;}
+	</style>
+</head>
+<body>
+	<!-- Title -->
+	<h1><i>Who Said That?</i> Othello Edition</h1>
+	<p>Welcome to <i>Who Said That?</i> Othello Edition. Press the Generate button to bring up a random quote from Shakespeare's Othello.<br>
+		Try taking a guess at who said that quote, and see how high of a score you can get!</p>
+	<h4 id="scre">Score: 0</h4>
+	<button type="button" onclick="setLine()">Generate!</button>
+	<div id="othellodiv" hidden></div>
+	<p id="line">Press "Generate" to begin.</p>
+	<input type="text" id="guess">
+	<button type="button" onclick="check()">Guess!</button>
+	<button type="button" onclick="giveup()">Give Up</button>
+	<p id="result"></p>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+
+var speakers = [];
+var lines = [];
+var x = 0;
+var score = 0;
+
+$(function (){
+	displayResult();
+	parse();
+});
+
+function loadXMLDoc(filename)
+{
+if (window.ActiveXObject)
+  {
+  xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  }
+else 
+  {
+  xhttp = new XMLHttpRequest();
+  }
+xhttp.open("GET", filename, false);
+try {xhttp.responseType = "msxml-document"} catch(err) {} // Helping IE11
+xhttp.send("");
+return xhttp.responseXML;
+}
+
+function displayResult()
+{
+xml = loadXMLDoc("othello.xml");
+xsl = loadXMLDoc("shscript.xsl");
+ if (document.implementation && document.implementation.createDocument)
+  {
+  xsltProcessor = new XSLTProcessor();
+  xsltProcessor.importStylesheet(xsl);
+  resultDocument = xsltProcessor.transformToFragment(xml, document);
+  document.getElementById("othellodiv").appendChild(resultDocument);
+  }
+}
+
+function parse(){
+	var children;
+	$( "#othellodiv div" ).each(function(index){
+		children = $(this).children();
+
+		speakers[index] = $(this).children('span:first').text();
+		lines[index] = $(this).children('span:last').text();
+
+		console.log(lines[index]);
+	});
+}
+
+function setLine(){
+	x = getRandom();
+	document.getElementById("line").innerHTML = "<i>" + lines[x] + "</i>";
+}
+
+function getRandom(){
+	return Math.floor(Math.random()*speakers.length);
+}
+
+function check(){
+	if (x != 0){
+		if (document.getElementById("guess").value.toUpperCase() === speakers[x]){
+			document.getElementById("result").innerHTML = "Correct!";
+			score++;
+			document.getElementById('scre').innerHTML = "Score: " +score;
+			setLine();
+		}
+		else{
+			document.getElementById("result").innerHTML = "Incorrect.";
+		}
+	}
+}
+
+function giveup(){
+	if (x != 0){
+		document.getElementById("result").innerHTML = speakers[x];
+		setLine();
+	}
+}
+
+</script>
+
+</body>
+</html>
