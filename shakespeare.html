@@ -8,61 +8,75 @@
 	</style>
 </head>
 <body>
-	<!-- Title -->
+	<!-- Title and Decription-->
 	<h1><i>Who Said That?</i> Othello Edition</h1>
 	<p>Welcome to <i>Who Said That?</i> Othello Edition. Press the Generate button to bring up a random quote from Shakespeare's Othello.<br>
 		Try taking a guess at who said that quote, and see how high of a score you can get!</p>
+    
+    <!-- Score and Generate Button -->
 	<h4 id="scre">Score: 0</h4>
 	<button type="button" onclick="setLine()">Generate!</button>
+    
+    <!-- Hidden div that contains the lines and speakers, taken from the XML -->
 	<div id="othellodiv" hidden></div>
-	<p id="line">Press "Generate" to begin.</p>
+	
+    <!-- The "Play Space" -->
+    <p id="line">Press "Generate" to begin.</p>
 	<input type="text" id="guess">
 	<button type="button" onclick="check()">Guess!</button>
 	<button type="button" onclick="giveup()">Give Up</button>
 	<p id="result"></p>
 
+
+<!-- Scripts Below -->
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    
 <script>
 
-var speakers = [];
-var lines = [];
-var x = 0;
-var score = 0;
+//Variables
+var speakers = [];  //Contains all Speakers, in order of lines delivered
+var lines = [];     //Contains all lines spoken by the speaker where speaker[x] says lines[x]
+var x = 0;          //The location of the current line in question
+var score = 0;      //The player's score
 
+    //Runs the code off the bat
 $(function (){
-	displayResult();
-	parse();
+	displayResult();	//Grabs the XML/XSL Documents and obtains the speakers/lines
+	parse();			//Places the speakers into the speakers array, and the lines into the lines array
 });
 
+    //Loads the XML or XSL Document to be read into othellodiv
 function loadXMLDoc(filename)
 {
-if (window.ActiveXObject)
-  {
-  xhttp = new ActiveXObject("Msxml2.XMLHTTP");
-  }
-else 
-  {
-  xhttp = new XMLHttpRequest();
-  }
-xhttp.open("GET", filename, false);
-try {xhttp.responseType = "msxml-document"} catch(err) {} // Helping IE11
-xhttp.send("");
-return xhttp.responseXML;
+    if (window.ActiveXObject)
+    {
+        xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+    }
+    else {
+        xhttp = new XMLHttpRequest();
+    }
+    xhttp.open("GET", filename, false);	
+    try {xhttp.responseType = "msxml-document"} catch(err) {} // Helping IE11
+    xhttp.send("");
+    return xhttp.responseXML;
 }
 
+    //Imports the XML and XSL files and uses the styling from the XSL to read the XML into othellodiv
 function displayResult()
 {
-xml = loadXMLDoc("othello.xml");
-xsl = loadXMLDoc("shscript.xsl");
- if (document.implementation && document.implementation.createDocument)
-  {
-  xsltProcessor = new XSLTProcessor();
-  xsltProcessor.importStylesheet(xsl);
-  resultDocument = xsltProcessor.transformToFragment(xml, document);
-  document.getElementById("othellodiv").appendChild(resultDocument);
-  }
+    xml = loadXMLDoc("othello.xml");
+    xsl = loadXMLDoc("shscript.xsl");
+    if (document.implementation && document.implementation.createDocument)
+    {
+        xsltProcessor = new XSLTProcessor();
+        xsltProcessor.importStylesheet(xsl);
+        resultDocument = xsltProcessor.transformToFragment(xml, document);
+        document.getElementById("othellodiv").appendChild(resultDocument);
+    }
 }
 
+    //Takes the speakers and lines from othellodiv at each index and places them into the speakers and lines arrays
 function parse(){
 	var children;
 	$( "#othellodiv div" ).each(function(index){
@@ -75,15 +89,18 @@ function parse(){
 	});
 }
 
+	//Randomly generates an index and then displays the line at that index
 function setLine(){
 	x = getRandom();
 	document.getElementById("line").innerHTML = "<i>" + lines[x] + "</i>";
 }
 
+	//Randomly generates a number from 1 - speakers.length
 function getRandom(){
 	return Math.floor(Math.random()*speakers.length);
 }
 
+	//Checks if the guess made by the player is the same value as the line's speaker
 function check(){
 	if (x != 0){
 		if (document.getElementById("guess").value.toUpperCase() === speakers[x]){
@@ -98,6 +115,7 @@ function check(){
 	}
 }
 
+	//Displays the correct speaker and generates a new line.
 function giveup(){
 	if (x != 0){
 		document.getElementById("result").innerHTML = speakers[x];
